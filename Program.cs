@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
-namespace FastTracert
+namespace ButterTracert
 {
     class Program
     {
