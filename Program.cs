@@ -11,7 +11,7 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
-            var ips = TraceRoute("8.8.8.8");
+            var ips = TraceRoute("1.0.0.1");
             foreach (var item in ips) Console.WriteLine(item.Key + ":" + item.Value);
         }
 
@@ -37,7 +37,7 @@ namespace ButterTracert
                 switch (reply.Status)
                 {
                     case IPStatus.TtlExpired:
-                    case IPStatus.Success when !dict.ContainsValue(reply.Address):
+                        case IPStatus.Success when !dict.ContainsValue(reply.Address):
                         dict.Add(ttl, reply.Address);
                         break;
                     case IPStatus.TimedOut:
@@ -49,9 +49,9 @@ namespace ButterTracert
             });
 
             dict = dict.OrderBy(o => o.Key).ToDictionary(o => o.Key, p => p.Value);
-            if (dict.ContainsKey(dict.ElementAt(dict.Count - 2).Key + 1)) return dict;
-            dict.Add(dict.ElementAt(dict.Count - 2).Key + 1, dict.Last().Value);
-            dict.Remove(dict.ElementAt(dict.Count - 2).Key);
+            var last = dict.Last();
+            dict.Remove(last.Key);
+            dict.Add(dict.Last().Key + 1, last.Value);
             return dict;
         }
     }
