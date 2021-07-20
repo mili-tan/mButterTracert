@@ -11,7 +11,7 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
-            var ips = TraceRoute("1.0.0.1");
+            var ips = TraceRoute(args.First());
             foreach (var item in ips) Console.WriteLine(item.Key + ":" + item.Value);
         }
 
