@@ -16,7 +16,7 @@ namespace ButterTracert
             var cmd = new CommandLineApplication
             {
                 Name = "mButterTracert",
-                Description = "mButterTracert - Simple parallelism based fast route tracing tool." +
+                Description = "mButterTracert - Simple parallelism based fast traceroute tool." +
                               Environment.NewLine +
                               $"Copyright (c) {DateTime.Now.Year} Milkey Tan. Code released under the MIT License"
             };
