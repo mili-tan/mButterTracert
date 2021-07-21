@@ -33,12 +33,12 @@ namespace ButterTracert
             var rOption = cmd.Option<int>("-r",
                 isZh ? "当跃点超时重试发送请求。" : "Retry sending request when hops timeout", CommandOptionType.NoValue);
 
-            var hops = hOption.HasValue() ? hOption.ParsedValue : 30;
-            var wait = wOption.HasValue() ? wOption.ParsedValue : 1000;
-            var rcount = cOption.HasValue() ? cOption.ParsedValue : 3;
-
             cmd.OnExecute(() =>
             {
+                var hops = hOption.HasValue() ? hOption.ParsedValue : 30;
+                var wait = wOption.HasValue() ? wOption.ParsedValue : 1000;
+                var rcount = cOption.HasValue() ? cOption.ParsedValue : 3;
+
                 if (string.IsNullOrWhiteSpace(hostArg.Value))
                 {
                     Console.WriteLine((isZh ? "指定的目标主机地址不应该为空。" : "The target host address should not be empty.") +
