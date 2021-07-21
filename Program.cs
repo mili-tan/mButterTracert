@@ -47,12 +47,12 @@ namespace ButterTracert
                     return;
                 }
 
-                Console.WriteLine((isZh
+                Console.WriteLine(Environment.NewLine + (isZh
                     ? $"通过最大 {hops} 个跃点跟踪至 {hostArg.Value} 的路由"
                     : $"Trace routes to {hostArg.Value} via Maximum of {hops} hops.") + Environment.NewLine);
                 var ips = TraceRoute(hostArg.Value, wait, hops, rOption.HasValue(), rcount);
                 foreach (var item in ips) Console.WriteLine(item.Key + " " + item.Value);
-                Console.WriteLine(Environment.NewLine + (isZh ? "追踪完成" : "Tracing completed"));
+                Console.WriteLine(Environment.NewLine + (isZh ? "追踪完成。" : "Tracing completed") + Environment.NewLine);
             });
 
             cmd.Execute(args);
