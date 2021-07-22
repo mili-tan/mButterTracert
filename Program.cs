@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,36 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
+            Task.WaitAny(
+                Task.Run(() =>
+                {
+                    Task.WaitAll(
+                        new WebClient().DownloadFileTaskAsync(
+                            "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-City.mmdb",
+                            "GeoLite2-City.mmdb"),
+                        new WebClient().DownloadFileTaskAsync(
+                            "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb",
+                            "GeoLite2-ASN.mmdb"));
+                }),
+                Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        Console.WriteLine("Downloading GeoLite2 Database  |");
+                        ClearCurrentConsoleLine();
+                        Thread.Sleep(100);
+                        Console.WriteLine("Downloading GeoLite2 Database  /");
+                        Thread.Sleep(100);
+                        ClearCurrentConsoleLine();
+                        Console.WriteLine("Downloading GeoLite2 Database  -");
+                        Thread.Sleep(100);
+                        ClearCurrentConsoleLine();
+                        Console.WriteLine("Downloading GeoLite2 Database  \\");
+                        Thread.Sleep(100);
+                        ClearCurrentConsoleLine();
+                    }
+                }));
+
             var cmd = new CommandLineApplication
             {
                 Name = "mButterTracert",
@@ -69,6 +101,15 @@ namespace ButterTracert
             {
                 return string.Empty;
             }
+        }
+
+        public static void ClearCurrentConsoleLine()
+        {
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, currentLineCursor);
         }
 
         public static Dictionary<int, IPAddress> TraceRoute(string hostname, int timeout, int maxTTL,
