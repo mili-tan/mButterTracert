@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
@@ -13,6 +15,7 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
+            Console.WriteLine(GetHostName(IPAddress.Parse("1.2.3.4")));
             var cmd = new CommandLineApplication
             {
                 Name = "mButterTracert",
@@ -51,11 +54,36 @@ namespace ButterTracert
                     ? $"通过最大 {hops} 个跃点跟踪至 {hostArg.Value} 的路由"
                     : $"Trace routes to {hostArg.Value} via Maximum of {hops} hops.") + Environment.NewLine);
                 var ips = TraceRoute(hostArg.Value, wait, hops, rOption.HasValue(), rcount);
-                foreach (var item in ips) Console.WriteLine(item.Key + " " + item.Value);
+                foreach (var item in ips)
+                    Console.WriteLine(item.Key + " " + item.Value);
                 Console.WriteLine(Environment.NewLine + (isZh ? "追踪完成。" : "Tracing completed") + Environment.NewLine);
             });
 
             cmd.Execute(args);
+        }
+
+        public static string GetHostName(IPAddress ip)
+        {
+            if (ip.AddressFamily != AddressFamily.InterNetwork) return string.Empty;
+            var host = string.Empty;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    var answer = new HttpClient()
+                        .GetStringAsync($"https://doh.pub/dns-query?name={ip}.in-addr.arpa&type=ptr")
+                        .Result;
+                    host = MojoJson.Json.Parse(answer).AsObjectGetArray("Answer").First().AsObjectGetString("data")
+                        .TrimEnd('.');
+                }
+                catch (Exception)
+                {
+                    host = string.Empty;
+                }
+            }).Wait(2000);
+
+            return host;
         }
 
         public static Dictionary<int, IPAddress> TraceRoute(string hostname, int timeout, int maxTTL,
