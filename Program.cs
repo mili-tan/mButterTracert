@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
@@ -15,7 +13,6 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(GetHostName(IPAddress.Parse("1.2.3.4")));
             var cmd = new CommandLineApplication
             {
                 Name = "mButterTracert",
@@ -64,26 +61,14 @@ namespace ButterTracert
 
         public static string GetHostName(IPAddress ip)
         {
-            if (ip.AddressFamily != AddressFamily.InterNetwork) return string.Empty;
-            var host = string.Empty;
-
-            Task.Run(() =>
+            try
             {
-                try
-                {
-                    var answer = new HttpClient()
-                        .GetStringAsync($"https://doh.pub/dns-query?name={ip}.in-addr.arpa&type=ptr")
-                        .Result;
-                    host = MojoJson.Json.Parse(answer).AsObjectGetArray("Answer").First().AsObjectGetString("data")
-                        .TrimEnd('.');
-                }
-                catch (Exception)
-                {
-                    host = string.Empty;
-                }
-            }).Wait(2000);
-
-            return host;
+                return Dns.GetHostEntry(ip).HostName;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
 
         public static Dictionary<int, IPAddress> TraceRoute(string hostname, int timeout, int maxTTL,
