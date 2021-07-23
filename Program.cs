@@ -15,35 +15,35 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
-            Task.WaitAny(
-                Task.Run(() =>
-                {
-                    Task.WaitAll(
-                        new WebClient().DownloadFileTaskAsync(
-                            "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-City.mmdb",
-                            "GeoLite2-City.mmdb"),
-                        new WebClient().DownloadFileTaskAsync(
-                            "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb",
-                            "GeoLite2-ASN.mmdb"));
-                }),
-                Task.Run(() =>
-                {
-                    while (true)
-                    {
-                        Console.WriteLine("Downloading GeoLite2 Database  |");
-                        ClearCurrentConsoleLine();
-                        Thread.Sleep(100);
-                        Console.WriteLine("Downloading GeoLite2 Database  /");
-                        Thread.Sleep(100);
-                        ClearCurrentConsoleLine();
-                        Console.WriteLine("Downloading GeoLite2 Database  -");
-                        Thread.Sleep(100);
-                        ClearCurrentConsoleLine();
-                        Console.WriteLine("Downloading GeoLite2 Database  \\");
-                        Thread.Sleep(100);
-                        ClearCurrentConsoleLine();
-                    }
-                }));
+            //Task.WaitAny(
+            //    Task.Run(() =>
+            //    {
+            //        Task.WaitAll(
+            //            new WebClient().DownloadFileTaskAsync(
+            //                "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-City.mmdb",
+            //                "GeoLite2-City.mmdb"),
+            //            new WebClient().DownloadFileTaskAsync(
+            //                "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb",
+            //                "GeoLite2-ASN.mmdb"));
+            //    }),
+            //    Task.Run(() =>
+            //    {
+            //        while (true)
+            //        {
+            //            Console.WriteLine("Downloading GeoLite2 Database  |");
+            //            ClearCurrentConsoleLine();
+            //            Thread.Sleep(100);
+            //            Console.WriteLine("Downloading GeoLite2 Database  /");
+            //            Thread.Sleep(100);
+            //            ClearCurrentConsoleLine();
+            //            Console.WriteLine("Downloading GeoLite2 Database  -");
+            //            Thread.Sleep(100);
+            //            ClearCurrentConsoleLine();
+            //            Console.WriteLine("Downloading GeoLite2 Database  \\");
+            //            Thread.Sleep(100);
+            //            ClearCurrentConsoleLine();
+            //        }
+            //    }));
 
             var cmd = new CommandLineApplication
             {
