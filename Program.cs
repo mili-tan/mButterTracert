@@ -103,7 +103,7 @@ namespace ButterTracert
                     {
                         try
                         {
-                            latency.TryAdd(i.Value, Convert.ToInt32(new Ping().Send(i.Value).RoundtripTime));
+                            latency.TryAdd(i.Value, Convert.ToInt32(new Ping().Send(i.Value, 1000).RoundtripTime));
                         }
                         catch (Exception)
                         {
