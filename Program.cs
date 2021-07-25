@@ -73,12 +73,15 @@ namespace ButterTracert
                 isZh ? "重试发送的回显请求数。" : "Number of echo requests to retry sending", CommandOptionType.SingleValue);
             var rOption = cmd.Option<int>("-r",
                 isZh ? "当跃点超时重试发送请求。" : "Retry sending request when hops timeout", CommandOptionType.NoValue);
+            var lOption = cmd.Option<int>("-l",
+                isZh ? "列出各跃点的往返延迟。" : "List the round-trip latency for each hops", CommandOptionType.NoValue);
 
             cmd.OnExecute(() =>
             {
                 var hops = hOption.HasValue() ? hOption.ParsedValue : 30;
                 var wait = wOption.HasValue() ? wOption.ParsedValue : 1000;
                 var rcount = cOption.HasValue() ? cOption.ParsedValue : 3;
+
 
                 if (string.IsNullOrWhiteSpace(hostArg.Value))
                 {
@@ -91,10 +94,33 @@ namespace ButterTracert
                 Console.WriteLine(Environment.NewLine + (isZh
                     ? $"通过最大 {hops} 个跃点跟踪至 {hostArg.Value} 的路由"
                     : $"Trace routes to {hostArg.Value} via Maximum of {hops} hops.") + Environment.NewLine);
+                
+                var latency = new Dictionary<IPAddress, int>();
                 var ips = TraceRoute(hostArg.Value, wait, hops, rOption.HasValue(), rcount);
+                if (lOption.HasValue())
+                {
+                    Parallel.ForEach(ips, i =>
+                    {
+                        try
+                        {
+                            latency.TryAdd(i.Value, Convert.ToInt32(new Ping().Send(i.Value).RoundtripTime));
+                        }
+                        catch (Exception)
+                        {
+                            latency.TryAdd(i.Value, 0);
+                        }
+                    });
+                    Thread.Sleep(100);
+                }
+
                 foreach (var item in ips)
-                    Console.WriteLine(item.Key.ToString().PadRight(3, ' ') + " " +
-                                      item.Value.ToString().PadLeft(15, ' ') + " " + GeoIP.GetGeoStr(item.Value));
+                    Console.WriteLine(
+                        item.Key.ToString().PadRight(3, ' ') + " " +
+                        item.Value.ToString().PadLeft(15, ' ') + " " +
+                        (lOption.HasValue() && latency.ContainsKey(item.Value)
+                            ? latency[item.Value] + "ms"
+                            : string.Empty).PadLeft(5, ' ') + " " +
+                        GeoIP.GetGeoStr(item.Value));
                 Console.WriteLine(Environment.NewLine + (isZh ? "追踪完成。" : "Tracing completed") + Environment.NewLine);
             });
 

@@ -69,7 +69,7 @@ namespace Arashi
                 try
                 {
                     asStr += $"[{asnResponse.AutonomousSystemOrganization} / AS{asnResponse.AutonomousSystemNumber}] "
-                        .PadRight(60);
+                        .PadRight(50);
                 }
                 catch (Exception e)
                 {
