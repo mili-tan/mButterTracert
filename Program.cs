@@ -15,46 +15,7 @@ namespace ButterTracert
     {
         static void Main(string[] args)
         {
-            string basePath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var isZh = Thread.CurrentThread.CurrentCulture.Name.Contains("zh");
-
-            if (!File.Exists(basePath + "GeoLite2-City.mmdb") || !File.Exists(basePath + "GeoLite2-ASN.mmdb"))
-            {
-                Task.WaitAny(
-                    Task.Run(() =>
-                    {
-                        Task.WaitAll(
-                            new WebClient().DownloadFileTaskAsync(
-                                isZh
-                                    ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-City.mmdb"
-                                    : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-City.mmdb",
-                                basePath + "GeoLite2-City.mmdb"),
-                            new WebClient().DownloadFileTaskAsync(
-                                isZh
-                                    ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb"
-                                    : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-ASN.mmdb",
-                                basePath + "GeoLite2-ASN.mmdb"));
-                    }),
-                    Task.Run(() =>
-                    {
-                        while (true)
-                        {
-                            Console.WriteLine("Downloading GeoLite2 Database  |");
-                            ClearCurrentConsoleLine();
-                            Thread.Sleep(100);
-                            Console.WriteLine("Downloading GeoLite2 Database  /");
-                            Thread.Sleep(100);
-                            ClearCurrentConsoleLine();
-                            Console.WriteLine("Downloading GeoLite2 Database  -");
-                            Thread.Sleep(100);
-                            ClearCurrentConsoleLine();
-                            Console.WriteLine("Downloading GeoLite2 Database  \\");
-                            Thread.Sleep(100);
-                            ClearCurrentConsoleLine();
-                        }
-                    }));
-            }
-
             var cmd = new CommandLineApplication
             {
                 Name = "mButterTracert",
@@ -75,6 +36,8 @@ namespace ButterTracert
                 isZh ? "当跃点超时重试发送请求。" : "Retry sending request when hops timeout", CommandOptionType.NoValue);
             var lOption = cmd.Option<int>("-l",
                 isZh ? "列出各跃点的往返延迟。" : "List the round-trip latency for each hops", CommandOptionType.NoValue);
+            var nOption = cmd.Option<int>("-n",
+                isZh ? "不显示 IP 地理位置信息与 ASN。" : "Do not show IP geolocation and ASN information", CommandOptionType.NoValue);
 
             cmd.OnExecute(() =>
             {
@@ -120,7 +83,7 @@ namespace ButterTracert
                         (lOption.HasValue() && latency.ContainsKey(item.Value)
                             ? latency[item.Value] + "ms"
                             : string.Empty).PadLeft(5, ' ') + " " +
-                        GeoIP.GetGeoStr(item.Value));
+                        (nOption.HasValue() ? string.Empty : GeoIP.GetGeoStr(item.Value)));
                 Console.WriteLine(Environment.NewLine + (isZh ? "追踪完成。" : "Tracing completed") + Environment.NewLine);
             });
 
@@ -184,6 +147,47 @@ namespace ButterTracert
             dict.Remove(last.Key);
             dict.Add(dict.Last().Key + 1, last.Value);
             return dict;
+        }
+        public static void DownloadIPDB()
+        {
+            var basePath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            var isZh = Thread.CurrentThread.CurrentCulture.Name.Contains("zh");
+            if (!File.Exists(basePath + "GeoLite2-City.mmdb") || !File.Exists(basePath + "GeoLite2-ASN.mmdb"))
+            {
+                Task.WaitAny(
+                    Task.Run(() =>
+                    {
+                        Task.WaitAll(
+                            new WebClient().DownloadFileTaskAsync(
+                                isZh
+                                    ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-City.mmdb"
+                                    : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-City.mmdb",
+                                basePath + "GeoLite2-City.mmdb"),
+                            new WebClient().DownloadFileTaskAsync(
+                                isZh
+                                    ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb"
+                                    : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-ASN.mmdb",
+                                basePath + "GeoLite2-ASN.mmdb"));
+                    }),
+                    Task.Run(() =>
+                    {
+                        while (true)
+                        {
+                            Console.WriteLine("Downloading GeoLite2 Database  |");
+                            ClearCurrentConsoleLine();
+                            Thread.Sleep(100);
+                            Console.WriteLine("Downloading GeoLite2 Database  /");
+                            Thread.Sleep(100);
+                            ClearCurrentConsoleLine();
+                            Console.WriteLine("Downloading GeoLite2 Database  -");
+                            Thread.Sleep(100);
+                            ClearCurrentConsoleLine();
+                            Console.WriteLine("Downloading GeoLite2 Database  \\");
+                            Thread.Sleep(100);
+                            ClearCurrentConsoleLine();
+                        }
+                    }));
+            }
         }
     }
 }
