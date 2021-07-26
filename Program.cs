@@ -21,7 +21,9 @@ namespace ButterTracert
                 Name = "mButterTracert",
                 Description = "mButterTracert - Simple parallelism based fast traceroute tool." +
                               Environment.NewLine +
-                              $"Copyright (c) {DateTime.Now.Year} Milkey Tan. Code released under the MIT License"
+                              $"Copyright (c) {DateTime.Now.Year} Milkey Tan. Code released under the MIT License" +
+                              Environment.NewLine +
+                              "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com"
             };
             cmd.HelpOption("-?|--help");
 
@@ -171,6 +173,8 @@ namespace ButterTracert
                     }),
                     Task.Run(() =>
                     {
+                        Console.WriteLine(
+                            "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com");
                         while (true)
                         {
                             Console.WriteLine("Downloading GeoLite2 Database  |");
