@@ -45,7 +45,7 @@ namespace ButterTracert
                 var wait = wOption.HasValue() ? wOption.ParsedValue : 1000;
                 var rcount = cOption.HasValue() ? cOption.ParsedValue : 3;
 
-
+                if (!nOption.HasValue()) DownloadIPDB();
                 if (string.IsNullOrWhiteSpace(hostArg.Value))
                 {
                     Console.WriteLine((isZh ? "指定的目标主机地址不应该为空。" : "The target host address should not be empty.") +
