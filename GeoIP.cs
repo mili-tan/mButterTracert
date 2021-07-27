@@ -20,12 +20,17 @@ namespace Arashi
 
         public static (AsnResponse, CityResponse) GetAsnCityValueTuple(IPAddress ipAddress)
         {
-            var asn = new AsnResponse();
-            var city = new CityResponse();
-            Task.WaitAll(
-                Task.Run(() => asn = GetAsnResponse(ipAddress)),
-                Task.Run(() => city = GetCityResponse(ipAddress)));
-            return (asn, city);
+            if (Thread.CurrentThread.CurrentCulture.Name.Contains("zh"))
+                return (GetAsnResponse(ipAddress), new CityResponse());
+            else
+            {
+                var asn = new AsnResponse();
+                var city = new CityResponse();
+                Task.WaitAll(
+                    Task.Run(() => asn = GetAsnResponse(ipAddress)),
+                    Task.Run(() => city = GetCityResponse(ipAddress)));
+                return (asn, city);
+            }
         }
 
         public static string GetCnISP(AsnResponse asnResponse, CityResponse cityResponse)
@@ -63,6 +68,7 @@ namespace Arashi
         {
             try
             {
+                var isZH = Thread.CurrentThread.CurrentCulture.Name.Contains("zh");
                 if (IPAddress.IsLoopback(ipAddress) || Equals(ipAddress, IPAddress.Any))
                     return string.Empty;
                 var (asnResponse, cityResponse) = GetAsnCityValueTuple(ipAddress);
@@ -81,7 +87,7 @@ namespace Arashi
                 }
 
                 var cityStr = string.Empty;
-                if (Thread.CurrentThread.CurrentCulture.Name.Contains("zh"))
+                if (isZH)
                     cityStr += string.Join(" ", IpdbDistrict.find(ipAddress.ToString(), "CN").Distinct()).PadRight(8);
                 else
                 {
@@ -101,8 +107,9 @@ namespace Arashi
 
                 return asStr + cityStr;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return string.Empty;
             }
         }

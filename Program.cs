@@ -25,8 +25,10 @@ namespace ButterTracert
                               $"Copyright (c) {DateTime.Now.Year} Milkey Tan. Code released under the MIT License" +
                               Environment.NewLine +
                               "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com" +
-                              Environment.NewLine +
-                              "This product includes FreeIPDB data created by IPIP.net, available from https://en.ipip.net"
+                              (isZh
+                                  ? Environment.NewLine +
+                                    "This product includes FreeIPDB data created by IPIP.net, available from https://en.ipip.net"
+                                  : string.Empty)
             };
             cmd.HelpOption("-?|--help");
 
@@ -157,41 +159,53 @@ namespace ButterTracert
         {
             var basePath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var isZh = Thread.CurrentThread.CurrentCulture.Name.Contains("zh");
-            if (!File.Exists(basePath + "GeoLite2-City.mmdb") || !File.Exists(basePath + "GeoLite2-ASN.mmdb"))
+            if ((isZh
+                ? !File.Exists(basePath + "ipipfree.ipdb")
+                : !File.Exists(basePath + "GeoLite2-City.mmdb")) || !File.Exists(basePath + "GeoLite2-ASN.mmdb"))
             {
                 Task.WaitAny(
                     Task.Run(() =>
                     {
-                        Task.WaitAll(
+                        var tasks = new List<Task>();
+                        tasks.Add(new WebClient().DownloadFileTaskAsync(
+                            isZh
+                                ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb"
+                                : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-ASN.mmdb",
+                            basePath + "GeoLite2-ASN.mmdb"));
+                        if (isZh)
+                        {
                             new WebClient().DownloadFileTaskAsync(
-                                isZh
-                                    ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-City.mmdb"
-                                    : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-City.mmdb",
-                                basePath + "GeoLite2-City.mmdb"),
+                                "https://mili-01.coding.net/p/k1/d/ipipdb/git/raw/master/ipipfree.ipdb",
+                                basePath + "ipipfree.ipdb");
+                        }
+                        else
+                        {
                             new WebClient().DownloadFileTaskAsync(
-                                isZh
-                                    ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb"
-                                    : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-ASN.mmdb",
-                                basePath + "GeoLite2-ASN.mmdb"));
+                                "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-City.mmdb",
+                                basePath + "GeoLite2-City.mmdb");
+                        }
+
+                        Task.WaitAll(tasks.ToArray());
                     }),
                     Task.Run(() =>
                     {
                         Console.WriteLine(
                             "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com");
-                        Console.WriteLine(
-                            "This product includes FreeIPDB data created by IPIP.net, available from https://en.ipip.net");
+                        if (isZh)
+                            Console.WriteLine(
+                                "This product includes FreeIPDB data created by IPIP.net, available from https://en.ipip.net");
                         while (true)
                         {
-                            Console.WriteLine("Downloading GeoLite2 Database  |");
+                            Console.WriteLine("Downloading GeoIP Database  |");
                             ClearCurrentConsoleLine();
                             Thread.Sleep(100);
-                            Console.WriteLine("Downloading GeoLite2 Database  /");
+                            Console.WriteLine("Downloading GeoIP Database  /");
                             Thread.Sleep(100);
                             ClearCurrentConsoleLine();
-                            Console.WriteLine("Downloading GeoLite2 Database  -");
+                            Console.WriteLine("Downloading GeoIP Database  -");
                             Thread.Sleep(100);
                             ClearCurrentConsoleLine();
-                            Console.WriteLine("Downloading GeoLite2 Database  \\");
+                            Console.WriteLine("Downloading GeoIP Database  \\");
                             Thread.Sleep(100);
                             ClearCurrentConsoleLine();
                         }
