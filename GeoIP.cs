@@ -51,7 +51,7 @@ namespace Arashi
                 var asStr = string.Empty;
                 var asnResponse = new DatabaseReader(SetupBasePath + "GeoLite2-ASN.mmdb").Asn(ipAddress);
                 asStr += $"[{asnResponse.AutonomousSystemOrganization} / AS{asnResponse.AutonomousSystemNumber}] "
-                    .PadRight(50);
+                    .PadRight(60);
 
                 var cityStr = string.Empty;
                 if (isZH)
