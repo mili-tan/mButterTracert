@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -12,35 +13,12 @@ namespace Arashi
     public class GeoIP
     {
         private static string SetupBasePath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
-        public static DatabaseReader AsnReader = new(SetupBasePath + "GeoLite2-ASN.mmdb");
-        public static DatabaseReader CityReader = new(SetupBasePath + "GeoLite2-City.mmdb");
-        public static District IpdbDistrict = new(SetupBasePath + "ipipfree.ipdb");
-        public static AsnResponse GetAsnResponse(IPAddress ipAddress) => AsnReader.Asn(ipAddress);
-        public static CityResponse GetCityResponse(IPAddress ipAddress) => CityReader.City(ipAddress);
 
-        public static (AsnResponse, CityResponse) GetAsnCityValueTuple(IPAddress ipAddress)
-        {
-            if (Thread.CurrentThread.CurrentCulture.Name.Contains("zh"))
-                return (GetAsnResponse(ipAddress), new CityResponse());
-            else
-            {
-                var asn = new AsnResponse();
-                var city = new CityResponse();
-                Task.WaitAll(
-                    Task.Run(() => asn = GetAsnResponse(ipAddress)),
-                    Task.Run(() => city = GetCityResponse(ipAddress)));
-                return (asn, city);
-            }
-        }
-
-        public static string GetCnISP(AsnResponse asnResponse, CityResponse cityResponse)
+        public static string GetCnISP(AsnResponse asnResponse)
         {
             try
             {
-                var country = cityResponse.Country.IsoCode;
                 var asName = asnResponse.AutonomousSystemOrganization.ToLower();
-
-                if (country != "CN") return string.Empty;
 
                 if (asName.Contains("cernet") || asName.Contains("education") || asName.Contains("research") ||
                     asName.Contains("university") || asName.Contains("academy") ||
@@ -71,26 +49,20 @@ namespace Arashi
                 var isZH = Thread.CurrentThread.CurrentCulture.Name.Contains("zh");
                 if (IPAddress.IsLoopback(ipAddress) || Equals(ipAddress, IPAddress.Any))
                     return string.Empty;
-                var (asnResponse, cityResponse) = GetAsnCityValueTuple(ipAddress);
-                var cnIsp = GetCnISP(asnResponse, cityResponse);
 
                 var asStr = string.Empty;
-
-                try
-                {
-                    asStr += $"[{asnResponse.AutonomousSystemOrganization} / AS{asnResponse.AutonomousSystemNumber}] "
-                        .PadRight(50);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                var asnResponse = new DatabaseReader(SetupBasePath + "GeoLite2-ASN.mmdb").Asn(ipAddress);
+                asStr += $"[{asnResponse.AutonomousSystemOrganization} / AS{asnResponse.AutonomousSystemNumber}] "
+                    .PadRight(50);
 
                 var cityStr = string.Empty;
                 if (isZH)
-                    cityStr += string.Join(" ", IpdbDistrict.find(ipAddress.ToString(), "CN").Distinct()).PadRight(8);
+                    cityStr += string.Join(" ",
+                            new District(SetupBasePath + "ipipfree.ipdb").find(ipAddress.ToString(), "CN").Distinct())
+                        .PadRight(8);
                 else
                 {
+                    var cityResponse = new DatabaseReader(SetupBasePath + "GeoLite2-City.mmdb").City(ipAddress);
                     if (!string.IsNullOrWhiteSpace(cityResponse.Country.IsoCode))
                         cityStr += cityResponse.Country.IsoCode + " ";
                     if (!string.IsNullOrWhiteSpace(cityResponse.MostSpecificSubdivision.IsoCode))
@@ -100,16 +72,16 @@ namespace Arashi
                     cityStr = cityStr.PadRight(20);
                 }
 
-                if (!string.IsNullOrEmpty(cnIsp))
-                    asStr += $"[{cnIsp}] ".PadLeft(5);
-                else
-                    asStr += "     ";
+                //if (isZH&& cityStr.Contains("中国"))
+                //{
+                //    var cnIsp = GetCnISP(asnResponse);
+                //    asStr += !string.IsNullOrEmpty(cnIsp) ? $"[{cnIsp}] ".PadLeft(5) : "     ";
+                //}
 
                 return asStr + cityStr;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
                 return string.Empty;
             }
         }
