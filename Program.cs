@@ -7,7 +7,6 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Arashi;
-using ipdb;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace ButterTracert
