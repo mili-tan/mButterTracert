@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using ipdb;
 using MaxMind.GeoIP2;
 using MaxMind.GeoIP2.Responses;
 
@@ -11,6 +14,7 @@ namespace Arashi
         private static string SetupBasePath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
         public static DatabaseReader AsnReader = new(SetupBasePath + "GeoLite2-ASN.mmdb");
         public static DatabaseReader CityReader = new(SetupBasePath + "GeoLite2-City.mmdb");
+        public static District IpdbDistrict = new(SetupBasePath + "ipipfree.ipdb");
         public static AsnResponse GetAsnResponse(IPAddress ipAddress) => AsnReader.Asn(ipAddress);
         public static CityResponse GetCityResponse(IPAddress ipAddress) => CityReader.City(ipAddress);
 
@@ -77,17 +81,23 @@ namespace Arashi
                 }
 
                 var cityStr = string.Empty;
-                if (!string.IsNullOrWhiteSpace(cityResponse.Country.IsoCode))
-                    cityStr += cityResponse.Country.IsoCode + " ";
-                if (!string.IsNullOrWhiteSpace(cityResponse.MostSpecificSubdivision.IsoCode))
-                    cityStr += cityResponse.MostSpecificSubdivision.IsoCode + " ";
-                if (!string.IsNullOrWhiteSpace(cityResponse.City.Name))
-                    cityStr += cityResponse.City.Name + " ";
-
-                cityStr = cityStr.PadRight(20);
+                if (Thread.CurrentThread.CurrentCulture.Name.Contains("zh"))
+                    cityStr += string.Join(" ", IpdbDistrict.find(ipAddress.ToString(), "CN").Distinct()).PadRight(8);
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(cityResponse.Country.IsoCode))
+                        cityStr += cityResponse.Country.IsoCode + " ";
+                    if (!string.IsNullOrWhiteSpace(cityResponse.MostSpecificSubdivision.IsoCode))
+                        cityStr += cityResponse.MostSpecificSubdivision.IsoCode + " ";
+                    if (!string.IsNullOrWhiteSpace(cityResponse.City.Name))
+                        cityStr += cityResponse.City.Name + " ";
+                    cityStr = cityStr.PadRight(20);
+                }
 
                 if (!string.IsNullOrEmpty(cnIsp))
-                    cityStr += $"[{cnIsp}] ".PadLeft(10);
+                    asStr += $"[{cnIsp}] ".PadLeft(5);
+                else
+                    asStr += "     ";
 
                 return asStr + cityStr;
             }

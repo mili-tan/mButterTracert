@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Arashi;
+using ipdb;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace ButterTracert
@@ -23,7 +24,9 @@ namespace ButterTracert
                               Environment.NewLine +
                               $"Copyright (c) {DateTime.Now.Year} Milkey Tan. Code released under the MIT License" +
                               Environment.NewLine +
-                              "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com"
+                              "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com" +
+                              Environment.NewLine +
+                              "This product includes FreeIPDB data created by IPIP.net, available from https://en.ipip.net"
             };
             cmd.HelpOption("-?|--help");
 
@@ -175,6 +178,8 @@ namespace ButterTracert
                     {
                         Console.WriteLine(
                             "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com");
+                        Console.WriteLine(
+                            "This product includes FreeIPDB data created by IPIP.net, available from https://en.ipip.net");
                         while (true)
                         {
                             Console.WriteLine("Downloading GeoLite2 Database  |");
