@@ -22,7 +22,7 @@ namespace ButterTracert
                 Description = "mButterTracert - Simple parallelism based fast traceroute tool." +
                               Environment.NewLine +
                               $"Copyright (c) {DateTime.Now.Year} Milkey Tan. Code released under the MIT License" +
-                              Environment.NewLine +
+                              Environment.NewLine + Environment.NewLine +
                               "This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com" +
                               (isZh
                                   ? Environment.NewLine +
