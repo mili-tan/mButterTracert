@@ -49,34 +49,47 @@ namespace Arashi
                     return string.Empty;
 
                 var asStr = string.Empty;
-                var asnResponse = new DatabaseReader(SetupBasePath + "GeoLite2-ASN.mmdb").Asn(ipAddress);
-                asStr += $"[{asnResponse.AutonomousSystemOrganization} / AS{asnResponse.AutonomousSystemNumber}] "
-                    .PadRight(60);
-
-                var cityStr = string.Empty;
-                if (isZH)
-                    cityStr += string.Join(" ",
-                            new District(SetupBasePath + "ipipfree.ipdb").find(ipAddress.ToString(), "CN").Distinct())
-                        .PadRight(8);
-                else
+                try
                 {
-                    var cityResponse = new DatabaseReader(SetupBasePath + "GeoLite2-City.mmdb").City(ipAddress);
-                    if (!string.IsNullOrWhiteSpace(cityResponse.Country.IsoCode))
-                        cityStr += cityResponse.Country.IsoCode + " ";
-                    if (!string.IsNullOrWhiteSpace(cityResponse.MostSpecificSubdivision.IsoCode))
-                        cityStr += cityResponse.MostSpecificSubdivision.IsoCode + " ";
-                    if (!string.IsNullOrWhiteSpace(cityResponse.City.Name))
-                        cityStr += cityResponse.City.Name + " ";
-                    cityStr = cityStr.PadRight(20);
+                    var asnResponse = new DatabaseReader(SetupBasePath + "GeoLite2-ASN.mmdb").Asn(ipAddress);
+                    asStr += $"[{asnResponse.AutonomousSystemOrganization} / AS{asnResponse.AutonomousSystemNumber}] ";
+
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine(e);
                 }
 
-                //if (isZH&& cityStr.Contains("中国"))
-                //{
-                //    var cnIsp = GetCnISP(asnResponse);
-                //    asStr += !string.IsNullOrEmpty(cnIsp) ? $"[{cnIsp}] ".PadLeft(5) : "     ";
-                //}
+                var cityStr = string.Empty;
+                try
+                {
+                    if (isZH)
+                        cityStr += string.Join(" ",
+                                new District(SetupBasePath + "ipipfree.ipdb").find(ipAddress.ToString(), "CN").Distinct());
+                    else
+                    {
+                        var cityResponse = new DatabaseReader(SetupBasePath + "GeoLite2-City.mmdb").City(ipAddress);
+                        if (!string.IsNullOrWhiteSpace(cityResponse.Country.IsoCode))
+                            cityStr += cityResponse.Country.IsoCode + " ";
+                        if (!string.IsNullOrWhiteSpace(cityResponse.MostSpecificSubdivision.IsoCode))
+                            cityStr += cityResponse.MostSpecificSubdivision.IsoCode + " ";
+                        if (!string.IsNullOrWhiteSpace(cityResponse.City.Name))
+                            cityStr += cityResponse.City.Name + " ";
+                        cityStr = cityStr.PadRight(20);
+                    }
 
-                return asStr + cityStr;
+                    //if (isZH && cityStr.Contains("中国"))
+                    //{
+                    //    var cnIsp = GetCnISP(asnResponse);
+                    //    asStr += !string.IsNullOrEmpty(cnIsp) ? $"[{cnIsp}] ".PadLeft(5) : "     ";
+                    //}
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine(e);
+                }
+
+                return asStr.PadRight(60) + cityStr.PadRight(8);
             }
             catch (Exception)
             {

@@ -179,7 +179,7 @@ namespace ButterTracert
                         var tasks = new List<Task>();
                         tasks.Add(new WebClient().DownloadFileTaskAsync(
                             isZh
-                                ? "https://mili-01.coding.net/p/k1/d/maxmind-geoip/git/raw/release/GeoLite2-ASN.mmdb"
+                                ? "http://gh.mili.one/raw.githubusercontent.com/mili-tan/maxmind-geoip/release/GeoLite2-ASN.mmdb"
                                 : "https://github.com/mili-tan/maxmind-geoip/raw/release/GeoLite2-ASN.mmdb",
                             basePath + "GeoLite2-ASN.mmdb"));
                         if (isZh)
