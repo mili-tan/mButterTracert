@@ -83,13 +83,20 @@ namespace ButterTracert
                 }
 
                 foreach (var item in ips)
-                    Console.WriteLine(
-                        item.Key.ToString().PadRight(3, ' ') + " " +
-                        item.Value.ToString().PadLeft(15, ' ') + " " +
-                        (lOption.HasValue() && latency.ContainsKey(item.Value)
-                            ? latency[item.Value] + "ms"
-                            : string.Empty).PadLeft(5, ' ') + " " +
-                        (nOption.HasValue() ? string.Empty : GeoIP.GetGeoStr(item.Value)));
+                    try
+                    {
+                        Console.WriteLine(
+                            item.Key.ToString().PadRight(3, ' ') + " " +
+                            item.Value.ToString().PadLeft(15, ' ') + " " +
+                            (lOption.HasValue() && latency.ContainsKey(item.Value)
+                                ? latency[item.Value] + "ms"
+                                : string.Empty).PadLeft(5, ' ') + " " +
+                            (nOption.HasValue() ? string.Empty : GeoIP.GetGeoStr(item.Value)));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 Console.WriteLine(Environment.NewLine + (isZh ? "追踪完成。" : "Tracing completed") + Environment.NewLine);
             });
 
@@ -134,18 +141,22 @@ namespace ButterTracert
                         else
                             break;
 
-                switch (reply.Status)
+
+                if (!dict.ContainsValue(reply.Address))
                 {
-                    case IPStatus.TtlExpired:
-                    case IPStatus.Success when !dict.ContainsValue(reply.Address):
-                        dict.Add(ttl, reply.Address);
-                        break;
-                    case IPStatus.TimedOut:
-                        dict.Add(ttl, IPAddress.Any);
-                        break;
-                    case IPStatus.Success:
-                        break;
+                    switch (reply.Status)
+                    {
+
+                        case IPStatus.TtlExpired:
+                        case IPStatus.Success:
+                            dict.Add(ttl, reply.Address);
+                            break;
+                        case IPStatus.TimedOut:
+                            dict.Add(ttl, IPAddress.Any);
+                            break;
+                    }
                 }
+
             });
 
             dict = dict.OrderBy(o => o.Key).ToDictionary(o => o.Key, p => p.Value);
