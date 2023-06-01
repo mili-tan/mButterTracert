@@ -165,6 +165,7 @@ namespace ButterTracert
             dict.Add(dict.Last().Key + 1, last.Value);
             return dict;
         }
+
         public static void DownloadIPDB()
         {
             var basePath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -185,7 +186,7 @@ namespace ButterTracert
                         if (isZh)
                         {
                             new WebClient().DownloadFileTaskAsync(
-                                "https://mili-01.coding.net/p/k1/d/ipipdb/git/raw/master/ipipfree.ipdb",
+                                "http://gh.mili.one/raw.githubusercontent.com/Delphier/ipip/master/ipipfree.ipdb",
                                 basePath + "ipipfree.ipdb");
                         }
                         else
